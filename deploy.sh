@@ -16,4 +16,4 @@ git commit -m 'deploy'
 git checkout -b main
 
 # deploy to github
-git push -f git@github.com:nikGogolev/vue-weather-widget.git main:gh-pages
+git push -f git@github.com:nikGogolev/repair-registration-widget.git main:gh-pages
