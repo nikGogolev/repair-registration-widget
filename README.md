@@ -6,7 +6,7 @@
 <iframe
 	width="460"
 	height="640"
-	src="https://nikgogolev.github.io/vue-weather-widget/"
+	src="https://nikgogolev.github.io/repair-registration-widget/"
 	title="Vue weather widget"
 	frameborder="0"
 ></iframe>
