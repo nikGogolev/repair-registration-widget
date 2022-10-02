@@ -1,9 +1,9 @@
 <template>
   <div class="modal_backdrop">
     <div class="modal">
-      <header class="modal_header">Вы записаны!</header>
+      <header class="modal_header">{{ message.header }}</header>
       <div class="modal_text">
-        {{ messageText }}
+        {{ message.text }}
       </div>
       <button type="button" class="btn_close" @click="$emit('close')">
         Close
@@ -14,10 +14,14 @@
 
 <script lang="ts">
 import { defineComponent } from "@vue/runtime-core";
+import type { PropType } from "vue";
+import type { MessageObject } from "@/App.vue";
 
 export default defineComponent({
   name: "ErrorModal",
-  props: { messageText: { type: String, required: true } },
+  props: {
+    message: { type: Object as PropType<MessageObject>, required: true },
+  },
   emits: ["close"],
 });
 </script>

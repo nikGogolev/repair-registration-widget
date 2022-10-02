@@ -168,6 +168,7 @@
 </template>
 
 <script lang="ts">
+import { MessageObject } from "@/App.vue";
 import { defineComponent } from "vue";
 
 interface Station {
@@ -220,34 +221,16 @@ export default defineComponent({
       time: "08:00",
       timeHours: "08",
       timeMinutes: "00",
+      authorizationIntervalID: 0,
     };
   },
   name: "MainPage",
   components: {},
   async created() {
-    try {
-      const username = "TEH_TEST";
-      const password = "a1b2c3D$";
-      const API_KEY = "92ae9e4c96394cf2aa2f462a5fde3b19";
-
-      const LOGIN_URL = `https://zenon.basgroup.ru:55724/api-v2/auth/login?API_KEY=${API_KEY}`;
-
-      let headers = new Headers();
-
-      headers.set("Authorization", "Basic " + btoa(username + ":" + password));
-      const response = await fetch(LOGIN_URL, {
-        method: "GET",
-        headers: headers,
-      });
-
-      const authData = await response.json();
-      this.SESSIONID = authData.SESSIONID;
-    } catch (error) {
-      if (error instanceof Error) {
-        console.log(error.message);
-      }
-    }
-
+    this.authorizationIntervalID = setInterval(() => {
+      this.auth();
+    }, 1200000);
+    await this.auth();
     try {
       const URL = `https://zenon.basgroup.ru:55724/api-v2/Core/RW/Directories/LDepartmentsCombo?SESSIONID=${this.SESSIONID}`;
       const response = await fetch(URL);
@@ -278,7 +261,35 @@ export default defineComponent({
   },
 
   methods: {
+    async auth() {
+      try {
+        const username = "TEH_TEST";
+        const password = "a1b2c3D$";
+        const API_KEY = "92ae9e4c96394cf2aa2f462a5fde3b19";
+
+        const LOGIN_URL = `https://zenon.basgroup.ru:55724/api-v2/auth/login?API_KEY=${API_KEY}`;
+
+        let headers = new Headers();
+
+        headers.set(
+          "Authorization",
+          "Basic " + btoa(username + ":" + password)
+        );
+        const response = await fetch(LOGIN_URL, {
+          method: "GET",
+          headers: headers,
+        });
+
+        const authData = await response.json();
+        this.SESSIONID = authData.SESSIONID;
+      } catch (error) {
+        if (error instanceof Error) {
+          console.log(error.message);
+        }
+      }
+    },
     checkCarRegNumber() {
+      this.carRegNumber = this.carRegNumber.trim().toUpperCase();
       this.check(
         "[А-Яа-яA-Za-z]{1}[0-9]{3}[А-Яа-яA-Za-z]{2}[0-9]{2,3}",
         this.carRegNumber,
@@ -287,6 +298,7 @@ export default defineComponent({
     },
 
     checkPhone() {
+      this.phone = this.phone.trim().replace(" ", "").replaceAll("-", "");
       this.check(
         "[0-9]{3}-?[0-9]{3}-?[0-9]{4}",
         this.phone,
@@ -295,6 +307,7 @@ export default defineComponent({
     },
 
     checkOwnerName() {
+      this.ownerName = this.ownerName.trim();
       this.check(
         "[А-Яа-яA-Za-z ]{3,}",
         this.ownerName,
@@ -383,7 +396,6 @@ export default defineComponent({
               this.model = findModel;
             }
 
-            //this.model = data.result.Response.rsaExtended.carModel;
             this.ownerName = data.result.Response.rsaExtended.insurantFio;
           }
         }
@@ -445,19 +457,25 @@ export default defineComponent({
         body: JSON.stringify(formData),
       });
       const data = await response.json();
-      const sheduleData = data.result.Response.ScheduledCar.data;
-      data.result.Response.ScheduledCar.data.START;
-      data.result.Response.ScheduledCar.data.SCHEDULE_ID;
-      data.result.Response.ScheduledCar.data.WRITER_NAME;
-      this.setMessage(
-        `Время записи: ${sheduleData.START}.\nВаш ID: ${sheduleData.SCHEDULE_ID}.\nВаш менеджер: ${sheduleData.WRITER_NAME}`
-      );
-      console.log(data);
-      console.log(formData);
-      this.clearForm();
+      if (data.result.Status === 0) {
+        const sheduleData = data.result.Response.ScheduledCar.data;
+        data.result.Response.ScheduledCar.data.START;
+        data.result.Response.ScheduledCar.data.SCHEDULE_ID;
+        data.result.Response.ScheduledCar.data.WRITER_NAME;
+        this.setMessage({
+          header: "Вы записаны!",
+          text: `Время записи: ${sheduleData.START}.\nВаш ID: ${sheduleData.SCHEDULE_ID}.\nВаш менеджер: ${sheduleData.WRITER_NAME}`,
+        });
+        this.clearForm();
+      } else {
+        this.setMessage({
+          header: `Не удалось записаться`,
+          text: "Попробуйте выбрать другое время",
+        });
+      }
     },
-    setMessage(messageText: string) {
-      this.$emit("message", messageText);
+    setMessage(messageOblect: MessageObject) {
+      this.$emit("message", messageOblect);
     },
   },
 });

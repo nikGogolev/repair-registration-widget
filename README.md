@@ -1,5 +1,17 @@
 # repair-registration-widget
 
+## Usage:
+## Add on your page next code
+```
+<iframe
+	width="460"
+	height="640"
+	src="https://nikgogolev.github.io/vue-weather-widget/"
+	title="Vue weather widget"
+	frameborder="0"
+></iframe>
+```
+
 ## Project setup
 ```
 npm install

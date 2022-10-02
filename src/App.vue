@@ -1,11 +1,18 @@
 <template>
-  <Modal v-if="message" @close="message = false" :messageText="messageText" />
-  <router-view @message="(messageText: string) => setMessage(messageText)" />
+  <Modal v-if="message" @close="message = false" :message="messageObject" />
+  <router-view
+    @message="(messageObject: MessageObject) => setMessage(messageObject)"
+  />
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
 import Modal from "@/components/Modal.vue";
+
+export type MessageObject = {
+  header: string;
+  text: string;
+};
 
 export default defineComponent({
   name: "App",
@@ -13,12 +20,15 @@ export default defineComponent({
     Modal,
   },
   data() {
-    return { message: true, messageText: "" };
+    return { message: false, messageObject: {} as MessageObject };
   },
   methods: {
-    setMessage(messageText: string) {
+    setMessage(messageObject: MessageObject) {
       this.message = true;
-      this.messageText = messageText;
+      this.messageObject = {
+        text: messageObject.text,
+        header: messageObject.header,
+      };
     },
   },
 });
